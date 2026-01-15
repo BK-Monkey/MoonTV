@@ -675,52 +675,45 @@ function PlayPageClient() {
     // 按行分割M3U8内容
     const lines = m3u8Content.split('\n');
     const filteredLines = [];
-    let inAdBlock = false;
-    let adBlockLines = [];
+    let inAdBlock = false; // 是否在广告区块内
+    let adSegmentCount = 0; // 统计移除的广告片段数量
 
-    // 保留文件开头的#EXTM3U标签
-    if (lines[0]?.includes('#EXTM3U')) {
-      filteredLines.push(lines[0]);
-    }
-
-    for (let i = 1; i < lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const trimmedLine = line.trim();
 
-      // 跳过空行
-      if (!trimmedLine) {
-        if (!inAdBlock) {
-          filteredLines.push(line);
-        }
-        continue;
+      // 🎯 增强功能1: 检测行业标准广告标记（SCTE-35系列）
+      // 使用 line.includes() 保持与原逻辑一致，兼容各种格式
+      if (line.includes('#EXT-X-CUE-OUT') ||
+          (line.includes('#EXT-X-DATERANGE') && line.includes('SCTE35')) ||
+          line.includes('#EXT-X-SCTE35') ||
+          line.includes('#EXT-OATCLS-SCTE35')) {
+        inAdBlock = true;
+        adSegmentCount++;
+        continue; // 跳过广告开始标记
       }
 
-      // 遇到#EXT-X-DISCONTINUITY标签
-      if (trimmedLine.includes('#EXT-X-DISCONTINUITY')) {
-        // 如果已经在广告块中，说明这是广告块的结束标签
-        if (inAdBlock) {
-          // 广告块结束，清空广告块内容，不添加到结果中
-          adBlockLines = [];
-          inAdBlock = false;
-        } else {
-          // 广告块开始
-          inAdBlock = true;
-          adBlockLines = [];
-        }
-        // 跳过所有#EXT-X-DISCONTINUITY标签
-        continue;
+      // 🎯 增强功能2: 检测广告结束标记
+      if (line.includes('#EXT-X-CUE-IN')) {
+        inAdBlock = false;
+        continue; // 跳过广告结束标记
       }
 
-      // 处理广告块内的内容
+      // 🎯 增强功能3: 如果在广告区块内，跳过所有内容
       if (inAdBlock) {
-        // 收集广告块内容，但不添加到结果中
-        adBlockLines.push(line);
-      } else {
-        // 正常内容，添加到结果中
+        continue;
+      }
+
+      // ✅ 原始逻辑保留: 过滤#EXT-X-DISCONTINUITY标识
+      if (!line.includes('#EXT-X-DISCONTINUITY')) {
         filteredLines.push(line);
       }
     }
-    console.log(filteredLines);
+
+    // 输出统计信息
+    if (adSegmentCount > 0) {
+      console.log(`✅ M3U8广告过滤: 移除 ${adSegmentCount} 个广告片段`);
+    }
+
     return filteredLines.join('\n');
   }
 
