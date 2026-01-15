@@ -675,12 +675,48 @@ function PlayPageClient() {
     // 按行分割M3U8内容
     const lines = m3u8Content.split('\n');
     const filteredLines = [];
+    let inAdBlock = false;
+    let adBlockLines = [];
 
-    for (let i = 0; i < lines.length; i++) {
+    // 保留文件开头的#EXTM3U标签
+    if (lines[0]?.includes('#EXTM3U')) {
+      filteredLines.push(lines[0]);
+    }
+
+    for (let i = 1; i < lines.length; i++) {
       const line = lines[i];
+      const trimmedLine = line.trim();
 
-      // 只过滤#EXT-X-DISCONTINUITY标识
-      if (!line.includes('#EXT-X-DISCONTINUITY')) {
+      // 跳过空行
+      if (!trimmedLine) {
+        if (!inAdBlock) {
+          filteredLines.push(line);
+        }
+        continue;
+      }
+
+      // 遇到#EXT-X-DISCONTINUITY标签
+      if (trimmedLine.includes('#EXT-X-DISCONTINUITY')) {
+        // 如果已经在广告块中，说明这是广告块的结束标签
+        if (inAdBlock) {
+          // 广告块结束，清空广告块内容，不添加到结果中
+          adBlockLines = [];
+          inAdBlock = false;
+        } else {
+          // 广告块开始
+          inAdBlock = true;
+          adBlockLines = [];
+        }
+        // 跳过所有#EXT-X-DISCONTINUITY标签
+        continue;
+      }
+
+      // 处理广告块内的内容
+      if (inAdBlock) {
+        // 收集广告块内容，但不添加到结果中
+        adBlockLines.push(line);
+      } else {
+        // 正常内容，添加到结果中
         filteredLines.push(line);
       }
     }
