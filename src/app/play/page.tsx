@@ -720,7 +720,7 @@ function PlayPageClient() {
         filteredLines.push(line);
       }
     }
-
+    console.log(filteredLines);
     return filteredLines.join('\n');
   }
 
