@@ -266,21 +266,34 @@ export default function DanmakuSelector({
                 </p>
               </div>
 
-              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-[400px] overflow-y-auto">
+              <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
                 {selectedAnime.episodes.map((episode, index) => {
                   const episodeNumber = index + 1;
                   const isSelected = selectedEpisode === episodeNumber;
+                  const displayTitle = episode.episodeTitle || `第${episodeNumber}集`;
                   return (
                     <button
                       key={episode.episodeId}
                       onClick={() => handleEpisodeSelect(episodeNumber)}
-                      className={`p-3 text-sm font-medium rounded-lg transition-all ${
+                      className={`relative group w-full text-left p-3 text-sm font-medium rounded-lg transition-all ${
                         isSelected
                           ? 'bg-green-500 text-white shadow-lg'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}
                     >
-                      {episode.episodeTitle || `第${episodeNumber}集`}
+                      <span className="block truncate">
+                        {displayTitle}
+                      </span>
+                      {/* 桌面端悬停提示 */}
+                      <span className="hidden sm:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none max-w-[300px]">
+                        {displayTitle}
+                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
+                      </span>
+                      {/* 移动端点击提示 */}
+                      <span className="sm:hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-active:opacity-100 group-active:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none max-w-[300px]">
+                        {displayTitle}
+                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
+                      </span>
                     </button>
                   );
                 })}
