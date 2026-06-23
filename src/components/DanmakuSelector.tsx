@@ -270,17 +270,21 @@ export default function DanmakuSelector({
                 {selectedAnime.episodes.map((episode, index) => {
                   const episodeNumber = index + 1;
                   const isSelected = selectedEpisode === episodeNumber;
+                  const displayTitle = episode.episodeTitle || `第${episodeNumber}集`;
                   return (
                     <button
                       key={episode.episodeId}
                       onClick={() => handleEpisodeSelect(episodeNumber)}
-                      className={`p-3 text-sm font-medium rounded-lg transition-all ${
+                      title={displayTitle}
+                      className={`p-3 text-sm font-medium rounded-lg transition-all overflow-hidden ${
                         isSelected
                           ? 'bg-green-500 text-white shadow-lg'
                           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                       }`}
                     >
-                      {episode.episodeTitle || `第${episodeNumber}集`}
+                      <span className="block truncate w-full">
+                        {displayTitle}
+                      </span>
                     </button>
                   );
                 })}
