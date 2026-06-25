@@ -465,9 +465,9 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
             </button>
           </div>
 
-          {/* 集数网格 */}
+          {/* 集数列表 */}
           <div className='overflow-y-auto flex-1 pb-4 scrollbar-hide'>
-            <div className='grid grid-cols-3 sm:grid-cols-4 gap-3'>
+            <div className='flex flex-col gap-2'>
               {(() => {
                 const len = currentEnd - currentStart + 1;
                 const episodes = Array.from({ length: len }, (_, i) =>
@@ -476,52 +476,30 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
                 return episodes;
               })().map((episodeNumber) => {
                 const isActive = episodeNumber === value;
+                const title = episodes_titles?.[episodeNumber - 1];
+                const displayText = (() => {
+                  if (!title) {
+                    return `第 ${episodeNumber} 集`;
+                  }
+                  const match = title.match(/第(\d+)集/);
+                  if (match) {
+                    return `第 ${match[1]} 集`;
+                  }
+                  return title;
+                })();
                 return (
                   <button
                     key={episodeNumber}
                     onClick={() => handleEpisodeClick(episodeNumber - 1)}
-                    className={`relative group h-9 px-1 py-1 flex items-center justify-center text-xs font-medium rounded transition-all duration-200 overflow-hidden font-mono
-                      ${
-                        isActive
-                          ? 'bg-green-500 text-white shadow-lg shadow-green-500/25 dark:bg-green-600'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:scale-105 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20'
-                      }`.trim()}
+                    className={`w-full text-left p-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? 'bg-green-500 text-white shadow-lg shadow-green-500/25 dark:bg-green-600'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20'
+                    }`.trim()}
                   >
-                    {(() => {
-                      const title = episodes_titles?.[episodeNumber - 1];
-                      const displayText = (() => {
-                        if (!title) {
-                          return episodeNumber.toString();
-                        }
-                        const match = title.match(/第(\d+)集/);
-                        if (match) {
-                          return match[1];
-                        }
-                        return title;
-                      })();
-                      
-                      return (
-                        <>
-                          <span className="truncate w-full">
-                            {displayText}
-                          </span>
-                          {/* 桌面端悬停提示 */}
-                          {title && title !== displayText && (
-                            <span className="hidden sm:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none max-w-[300px]">
-                              {title}
-                              <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
-                            </span>
-                          )}
-                          {/* 移动端点击提示 */}
-                          {title && title !== displayText && (
-                            <span className="sm:hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-active:opacity-100 group-active:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none max-w-[300px]">
-                              {title}
-                              <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
-                            </span>
-                          )}
-                        </>
-                      );
-                    })()}
+                    <span className="block truncate">
+                      {displayText}
+                    </span>
                   </button>
                 );
               })}
