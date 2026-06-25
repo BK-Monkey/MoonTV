@@ -480,7 +480,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
                   <button
                     key={episodeNumber}
                     onClick={() => handleEpisodeClick(episodeNumber - 1)}
-                    className={`h-9 px-1 py-1 flex items-center justify-center text-xs font-medium rounded transition-all duration-200 whitespace-nowrap font-mono
+                    className={`relative group h-9 px-1 py-1 flex items-center justify-center text-xs font-medium rounded transition-all duration-200 overflow-hidden font-mono
                       ${
                         isActive
                           ? 'bg-green-500 text-white shadow-lg shadow-green-500/25 dark:bg-green-600'
@@ -489,15 +489,38 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
                   >
                     {(() => {
                       const title = episodes_titles?.[episodeNumber - 1];
-                      if (!title) {
-                        return episodeNumber;
-                      }
-                      // 如果匹配"第X集"格式，提取中间的数字
-                      const match = title.match(/第(\d+)集/);
-                      if (match) {
-                        return match[1];
-                      }
-                      return title;
+                      const displayText = (() => {
+                        if (!title) {
+                          return episodeNumber.toString();
+                        }
+                        const match = title.match(/第(\d+)集/);
+                        if (match) {
+                          return match[1];
+                        }
+                        return title;
+                      })();
+                      
+                      return (
+                        <>
+                          <span className="truncate w-full">
+                            {displayText}
+                          </span>
+                          {/* 桌面端悬停提示 */}
+                          {title && title !== displayText && (
+                            <span className="hidden sm:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none max-w-[300px]">
+                              {title}
+                              <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
+                            </span>
+                          )}
+                          {/* 移动端点击提示 */}
+                          {title && title !== displayText && (
+                            <span className="sm:hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-active:opacity-100 group-active:visible transition-all duration-200 whitespace-nowrap z-10 pointer-events-none max-w-[300px]">
+                              {title}
+                              <span className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900 dark:border-t-gray-700"></span>
+                            </span>
+                          )}
+                        </>
+                      );
                     })()}
                   </button>
                 );
